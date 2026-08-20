@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "branchmi-pilot"
+version = "0.1.0"
+description = "Counterfactual pilot study for future-conditioned reasoning branch criticality"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "accelerate>=1.2",
+  "datasets>=3.2,<5",
+  "math-verify[antlr4_13_2]>=0.8,<0.9",
+  "matplotlib>=3.8",
+  "numpy>=1.26",
+  "PyYAML>=6.0",
+  "scikit-learn>=1.4",
+  "torch>=2.3",
+  "tqdm>=4.66",
+  "transformers>=4.51,<5",
+  "typing-extensions>=4.10",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.0",
+  "ruff>=0.6",
+]
+
+[project.scripts]
+branchmi-pilot = "branchmi_pilot.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"

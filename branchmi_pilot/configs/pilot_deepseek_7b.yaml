@@ -1,0 +1,71 @@
+run_name: math500_deepseek_r1_qwen_7b_pilot
+output_dir: outputs
+seed: 2026
+resume: true
+save_full_text: true
+
+dataset:
+  kind: hf
+  path: HuggingFaceH4/MATH-500
+  split: test
+  question_field: problem
+  answer_field: answer
+  limit: 200
+  shuffle: true
+  seed: 2026
+
+model:
+  name_or_path: deepseek-ai/DeepSeek-R1-Distill-Qwen-7B
+  dtype: bfloat16
+  device: auto
+  device_map: auto
+  attn_implementation: sdpa
+  trust_remote_code: true
+
+prompt:
+  system: You are a careful mathematical reasoner.
+  user_template: |-
+    Solve the following problem step by step. Put the final answer in \boxed{}.
+
+    Problem:
+    {question}
+  probe: >-
+    This is a diagnostic probe. Based only on the reasoning shown so far,
+    predict the most likely final answer. Do not continue the derivation.
+    Return only <answer>FINAL_ANSWER</answer>.
+  chat_template_kwargs: {}
+  probe_chat_template_kwargs: {}
+
+generation:
+  baseline_max_new_tokens: 1536
+  baseline_do_sample: false
+  baseline_temperature: 0.7
+  baseline_top_p: 0.95
+  oracle_max_total_tokens: 1536
+  oracle_do_sample: false
+  oracle_temperature: 0.7
+  oracle_top_p: 0.95
+  candidate_top_k: 3
+  lookahead_tokens: 64
+  probe_samples: 4
+  probe_max_new_tokens: 48
+  probe_temperature: 0.7
+  probe_top_p: 0.95
+
+checkpoints:
+  strategy: hybrid
+  max_per_problem: 8
+  stride: 96
+  min_generated_tokens: 32
+  tail_exclusion_tokens: 32
+  markers: ["\n", Wait, Alternatively, Therefore, Thus]
+
+analysis:
+  primary_label: oracle_answer_change
+  top_fraction: 0.10
+  bootstrap_samples: 1000
+  confidence_level: 0.95
+  min_auroc_gain: 0.08
+  min_top_precision_relative_gain: 0.15
+  min_probe_oracle_agreement: 0.70
+

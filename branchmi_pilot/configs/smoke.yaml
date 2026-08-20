@@ -1,0 +1,72 @@
+run_name: smoke
+output_dir: outputs
+seed: 2026
+resume: true
+save_full_text: true
+
+dataset:
+  kind: jsonl
+  path: fixtures/smoke_math.jsonl
+  split: test
+  question_field: problem
+  answer_field: answer
+  id_field: id
+  limit: 2
+  shuffle: false
+  seed: 2026
+
+model:
+  name_or_path: HuggingFaceTB/SmolLM2-135M-Instruct
+  dtype: float32
+  device: auto
+  device_map: null
+  attn_implementation: null
+  trust_remote_code: false
+  max_context_tokens: 2048
+
+prompt:
+  system: You are a careful mathematical reasoner.
+  user_template: |-
+    Solve the following problem step by step. Put the final answer in \boxed{}.
+
+    Problem:
+    {question}
+  probe: >-
+    Based only on the reasoning shown so far, predict the most likely final
+    answer. Return only <answer>FINAL_ANSWER</answer>.
+  chat_template_kwargs: {}
+  probe_chat_template_kwargs: {}
+
+generation:
+  baseline_max_new_tokens: 96
+  baseline_do_sample: false
+  baseline_temperature: 0.7
+  baseline_top_p: 0.95
+  oracle_max_total_tokens: 96
+  oracle_do_sample: false
+  oracle_temperature: 0.7
+  oracle_top_p: 0.95
+  candidate_top_k: 2
+  lookahead_tokens: 8
+  probe_samples: 2
+  probe_max_new_tokens: 16
+  probe_temperature: 0.8
+  probe_top_p: 0.95
+
+checkpoints:
+  strategy: uniform
+  max_per_problem: 2
+  stride: 32
+  min_generated_tokens: 8
+  tail_exclusion_tokens: 8
+  markers: ["\n"]
+
+analysis:
+  primary_label: oracle_answer_change
+  top_fraction: 0.10
+  bootstrap_samples: 50
+  confidence_level: 0.95
+  min_auroc_gain: 0.08
+  min_top_precision_relative_gain: 0.15
+  min_probe_oracle_agreement: 0.70
+
